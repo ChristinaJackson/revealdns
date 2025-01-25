@@ -7,20 +7,42 @@ import socket
 
 ###TBD - Get DNS Records
 
-
 def get_ipinfo(ip_address):
-    hosting_provider_ip = socket.gethostbyname(ip_address)
-    return hosting_provider_ip
+    try:
+        hosting_provider_ip = socket.gethostbyname(ip_address)
+        return hosting_provider_ip
+    except socket.gaierror as e:
+        # handle invalid domain or IP address
+        # -2 is eai_noname - host name cannot resolve because does not exist or is invalid
+        if e.errno == -2:
+            return {"error": "Hostname not found"}
+        #-3 is eai_again, temp dns resolution failure
+        elif e.errno == -3:
+            return {"error": "Temporary DNS issue, try again"}
+        else:
+            return {"error": f"DNS resolution failed: {e.strerror}"}
+    except Exception as e:
+        # Catch any other unexpected errors
+        return {"error": str(e), "message": "An unexpected error occurred"}
 
 def generate_ipinfo_link(ip_address):
     # Generate IPinfo link
-    if ip_address:
-        return f"https://ipinfo.io/{ip_address}"
-    return "no info"
+    return f"https://ipinfo.io/{ip_address}"
 
 def get_domain_registrar_info(domain_name):
     # whois lookup, want abuse contact
     domain_registrar = whois.whois(domain_name)
+
+    if all(value is None for value in domain_registrar.values()):
+        return {
+            "registrar_info": {
+                "name": "Not Available",
+                "url": "Not Available",
+            },
+            "abuse_emails": [],
+            "other_emails": [],
+            "error": "Invalid domain or no registrar data available"
+        }
 
     #registrar urls
     registrar_url = domain_registrar.get("registrar_url")
@@ -44,31 +66,62 @@ def get_domain_registrar_info(domain_name):
 
 
 def get_info(domain_name):
+    domain_input = domain_name
     domain_registrar = get_domain_registrar_info(domain_name)
     hosting_provider_ip = get_ipinfo(domain_name)
-    ipinfo_url = generate_ipinfo_link(hosting_provider_ip)
-    results = [domain_registrar, hosting_provider_ip, ipinfo_url]
-    #dictionairy for later:
-    # results = {
-    #     "domain_registrar": domain_registrar,
-    #     "hosting_provider_ip": hosting_provider_ip,
-    #     "ipinfo_url": ipinfo_url
-    # }
+    hosting_provider = {}
+
+    if isinstance(hosting_provider_ip, dict) and "error" in hosting_provider_ip:
+        # If there's an error, add the error to the results
+        hosting_provider = {
+            "ip": None,
+            "lookup_url": None,
+            "error": hosting_provider_ip["error"]
+        }
+    else:
+        # If no error, create the lookup URL
+        ipinfo_url = generate_ipinfo_link(hosting_provider_ip)
+        hosting_provider = {
+            "ip": hosting_provider_ip,
+            "lookup_url": ipinfo_url
+        }
+    results = {
+        "results for": domain_input,
+        "domain_registrar": domain_registrar,
+        "hosting_provider": hosting_provider
+    }
     return results
 
-# get_domain_registrar_info('www.holidaypartyevents.com')
 
-# results = get_info("www.lukeandlouise.com")
-# results = get_info("yieldscredit.com")
-# results = get_info("tabulation.co")
-# print(results[1])
+# print(get_info('www.holidaypartyevents.com'))
 
-# domain_lookup = whois.whois('www.holidaypartyevents.com')
-# name = domain_lookup.get("registrar", [])
-# registrar_url = domain_lookup.get("registrar_url", [] )
-# print(name, registrar_url)
+#test domains
+# www.lukeandlouise.com
+# yieldscredit.com
+# tabulation.co
+# www.holidaypartyevents.com
 
+# print(get_ipinfo("example.com"))  # Valid domain
+# print(get_ipinfo("invalid-domain"))  # Invalid domain
+# print(get_ipinfo(""))  # Empty input
 
-# NOTES on abuse contact formats:
-#emails": "abuse@dnspod.com
-#sometimes no emails, fall back to registar url
+print(get_info('www.lukeandlouise'))
+
+# print(whois.whois(''))
+
+# results structure:
+# {
+#     "domain_registrar": {
+#         "registrar_info": {
+#             "name": "Launchpad.com Inc.",
+#             "url": "http://www.launchpad.com"
+#         },
+#         "abuse_emails": ["abuse@hostgator.com"],
+#         "other_emails": ["info@crustnation.com", "domain.operations@web.com"]
+#     },
+#     "hosting_provider": {
+#         "ip": "162.214.129.144",
+#         "lookup_url": "https://ipinfo.io/162.214.129.144"
+#     }
+# }
+
