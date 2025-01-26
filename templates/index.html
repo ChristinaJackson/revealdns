@@ -31,6 +31,38 @@
             <button type="submit">Search</button>
     </form>
 </section>
+<section id="results">
+    <h2>Results for: {{ data['results for'] if data else 'No data' }}</h2>
+    <h3>Domain Registrar</h3>
+    <p>Name: {{ data['domain_registrar']['registrar_info']['name'] if data else 'Not Available' }}</p>
+    <p>URL: <a href="{{ data['domain_registrar']['registrar_info']['url'] if data else '#' }}">{{ data['domain_registrar']['registrar_info']['url'] if data else 'Not Available' }}</a></p>
+       <!-- Abuse Emails Section -->
+    <h3>Abuse Emails</h3>
+    <ul>
+        {% if data and data['domain_registrar']['abuse_emails'] %}
+            {% for email in data['domain_registrar']['abuse_emails'] %}
+                <li><a href="mailto:{{ email }}">{{ email }}</a></li>
+            {% endfor %}
+        {% else %}
+            <li>No abuse emails available</li>
+        {% endif %}
+    </ul>
+
+    <!-- Other Emails Section -->
+    <h3>Other Emails</h3>
+    <ul>
+        {% if data and data['domain_registrar']['other_emails'] %}
+            {% for email in data['domain_registrar']['other_emails'] %}
+                <li><a href="mailto:{{ email }}">{{ email }}</a></li>
+            {% endfor %}
+        {% else %}
+            <li>No other emails available</li>
+        {% endif %}
+    </ul>
+    <h3>Hosting Provider</h3>
+    <p>IP: {{ data['hosting_provider']['ip'] if data else 'Not Available' }}</p>
+    <a href="{{ data['hosting_provider']['lookup_url'] if data else '#' }}" target="_blank">View details on IPinfo</a>
+</section>
 
 </body>
 
