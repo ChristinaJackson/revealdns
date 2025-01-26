@@ -11,17 +11,25 @@ def validate_domain(domain_name):
     #check for blank input
     if not domain_name or domain_name.strip() == "":
         return {"is_valid": False, "error": "Domain name cannot be empty"}
-    # Use dns to check if the domain is valid
+    # non-ASCII domains conversion to punycode
     try:
-        socket.gethostbyname(domain_name)
+        # Convert Unicode domain to Punycode
+        punycode_domain = domain_name.encode("idna").decode("ascii")
+        # use dns to check if the domain is valid
+        socket.gethostbyname(punycode_domain)
         return {"is_valid": True, "error": None}
-    except socket.gaierror:
-        return {"is_valid": False, "error": "Domain name does not resolve. Please check the domain"}
+    except (socket.gaierror, UnicodeError):
+        # general error
+        return {"is_valid": False, "error": "Invalid domain name or domain does not resolve"}
+    except Exception as e:
+        # catch any unexpected errors
+        return {"is_valid": False, "error": f"Unexpected error: {str(e)}"}
 
 def get_ipinfo(ip_address):
     try:
         hosting_provider_ip = socket.gethostbyname(ip_address)
         return hosting_provider_ip
+    #addressing common errors
     except socket.gaierror as e:
         # handle invalid domain or IP address
         # -2 is eai_noname - host name cannot resolve because does not exist or is invalid
@@ -75,7 +83,7 @@ def get_domain_registrar_info(domain_name):
         "other_emails": other_emails
     }
 
-
+#may want to come back and break this up a bit in the future
 def get_info(domain_name):
     domain_input = domain_name
     # validate domain input
@@ -125,12 +133,13 @@ def get_info(domain_name):
 # yieldscredit.com
 # tabulation.co
 # www.holidaypartyevents.com
+# sanitär.jetzt
 
 # print(get_ipinfo("example.com"))  # Valid domain
 # print(get_ipinfo("invalid-domain"))  # Invalid domain
 # print(get_ipinfo(""))  # Empty input
 
-print(get_info(''))
+print(get_info('sanitär.jetzt'))
 
 # print(whois.whois(''))
 
