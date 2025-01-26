@@ -4,6 +4,7 @@ import socket
 
 #using whois for now, will want to move to using rdap in the future,
 #with a whois fallback when tld does not support rdap
+#might be good to cache results
 
 ###TBD - Get DNS Records
 
@@ -135,6 +136,7 @@ def get_info(domain_name):
 # tabulation.co
 # www.holidaypartyevents.com
 # sanitär.jetzt
+# www.online-apd.com - dns does not resolve but has whois
 
 # print(get_ipinfo("example.com"))  # Valid domain
 # print(get_ipinfo("invalid-domain"))  # Invalid domain
