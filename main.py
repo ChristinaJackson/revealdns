@@ -7,6 +7,17 @@ import socket
 
 ###TBD - Get DNS Records
 
+def validate_domain(domain_name):
+    #check for blank input
+    if not domain_name or domain_name.strip() == "":
+        return {"is_valid": False, "error": "Domain name cannot be empty"}
+    # Use dns to check if the domain is valid
+    try:
+        socket.gethostbyname(domain_name)
+        return {"is_valid": True, "error": None}
+    except socket.gaierror:
+        return {"is_valid": False, "error": "Domain name does not resolve. Please check the domain"}
+
 def get_ipinfo(ip_address):
     try:
         hosting_provider_ip = socket.gethostbyname(ip_address)
@@ -67,6 +78,17 @@ def get_domain_registrar_info(domain_name):
 
 def get_info(domain_name):
     domain_input = domain_name
+    # validate domain input
+    validation_result = validate_domain(domain_name)
+    if not validation_result["is_valid"]:
+        # if its invalid, return error
+        return {
+            "results for": domain_name,
+            "error": validation_result["error"],
+            "domain_registrar": None,
+            "hosting_provider": None
+        }
+
     domain_registrar = get_domain_registrar_info(domain_name)
     hosting_provider_ip = get_ipinfo(domain_name)
     hosting_provider = {}
@@ -93,7 +115,10 @@ def get_info(domain_name):
     return results
 
 
-# print(get_info('www.holidaypartyevents.com'))
+
+
+
+###TESTING CONTENT#####
 
 #test domains
 # www.lukeandlouise.com
@@ -105,11 +130,11 @@ def get_info(domain_name):
 # print(get_ipinfo("invalid-domain"))  # Invalid domain
 # print(get_ipinfo(""))  # Empty input
 
-print(get_info('www.lukeandlouise'))
+print(get_info(''))
 
 # print(whois.whois(''))
 
-# results structure:
+### results structure:
 # {
 #     "domain_registrar": {
 #         "registrar_info": {
