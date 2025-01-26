@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" type="text/css">
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap" rel="stylesheet">
     <title>Bears and Bees</title>
 </head>
 <body>
@@ -32,37 +34,51 @@
     </form>
 </section>
 <section id="results">
-    <h2>Results for: {{ data['results for'] if data else 'No data' }}</h2>
-    <h3>Domain Registrar</h3>
-    <p>Name: {{ data['domain_registrar']['registrar_info']['name'] if data else 'Not Available' }}</p>
-    <p>URL: <a href="{{ data['domain_registrar']['registrar_info']['url'] if data else '#' }}">{{ data['domain_registrar']['registrar_info']['url'] if data else 'Not Available' }}</a></p>
-       <!-- Abuse Emails Section -->
-    <h3>Abuse Emails</h3>
-    <ul>
-        {% if data and data['domain_registrar']['abuse_emails'] %}
-            {% for email in data['domain_registrar']['abuse_emails'] %}
-                <li><a href="mailto:{{ email }}">{{ email }}</a></li>
-            {% endfor %}
-        {% else %}
-            <li>No abuse emails available</li>
-        {% endif %}
-    </ul>
+    <!-- Show the result for domain or error message -->
+    <h3>Results for: {{ data['results for'] if data else 'No results due to error' }}</h3>
 
-    <!-- Other Emails Section -->
-    <h3>Other Emails</h3>
-    <ul>
-        {% if data and data['domain_registrar']['other_emails'] %}
-            {% for email in data['domain_registrar']['other_emails'] %}
-                <li><a href="mailto:{{ email }}">{{ email }}</a></li>
-            {% endfor %}
-        {% else %}
-            <li>No other emails available</li>
-        {% endif %}
-    </ul>
-    <h3>Hosting Provider</h3>
-    <p>IP: {{ data['hosting_provider']['ip'] if data else 'Not Available' }}</p>
-    <a href="{{ data['hosting_provider']['lookup_url'] if data else '#' }}" target="_blank">View details on IPinfo</a>
+    {% if error_message %}
+        <!-- If there's an error, show the error message -->
+        <div style="color: red; font-weight: bold;">
+            <p>{{ error_message }}</p>
+        </div>
+    {% else %}
+        <!-- Domain Registrar Section -->
+        <h2>Domain Registrar</h2>
+        <p>Name: {{ data['domain_registrar']['registrar_info']['name'] if data else 'Not Available' }}</p>
+        <p>URL: <a href="{{ data['domain_registrar']['registrar_info']['url'] if data else '#' }}">{{ data['domain_registrar']['registrar_info']['url'] if data else 'Not Available' }}</a></p>
+
+        <!-- Abuse Emails Section -->
+        <h3>Abuse Emails</h3>
+        <ul>
+            {% if data and data['domain_registrar']['abuse_emails'] %}
+                {% for email in data['domain_registrar']['abuse_emails'] %}
+                    <li><a href="mailto:{{ email }}">{{ email }}</a></li>
+                {% endfor %}
+            {% else %}
+                <li>No abuse emails available</li>
+            {% endif %}
+        </ul>
+
+        <!-- Other Emails Section -->
+        <h3>Other Emails</h3>
+        <ul>
+            {% if data and data['domain_registrar']['other_emails'] %}
+                {% for email in data['domain_registrar']['other_emails'] %}
+                    <li><a href="mailto:{{ email }}">{{ email }}</a></li>
+                {% endfor %}
+            {% else %}
+                <li>No other emails available</li>
+            {% endif %}
+        </ul>
+
+        <!-- Hosting Provider Section -->
+        <h2>Hosting Provider</h2>
+        <p>IP: {{ data['hosting_provider']['ip'] if data else 'Not Available' }}</p>
+        <a href="{{ data['hosting_provider']['lookup_url'] if data else '#' }}" target="_blank">View hosting abuse details on IPinfo</a>
+    {% endif %}
 </section>
+
 
 </body>
 

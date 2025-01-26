@@ -1,19 +1,32 @@
 body{
   background-color: #0B132B;
 /*   color: #6FFFE9; */
-  font-family: helvetica;
+  font-family: "Source Serif 4", serif;
   font-size: 16px;
 
 }
 
 h1{
-  font-size: 2.5rem;
+  font-size: 3rem;
   margin-bottom: 0;
   text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
-  color:#5BC0BE;
+  color: #5BC0BE;
   color: #6FFFE9;
-  color: #6FFFE9;
+}
 
+h2{
+  font-size: 1.9rem;
+/*   color: #D6EFFF; */
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+}
+
+h3 {
+  color:
+}
+
+h1, h2, h3 {
+  font-family: Oswald;
+  letter-spacing: .05rem;
 }
 
 /* #background-section{
@@ -30,6 +43,7 @@ h1{
   margin-right: auto;
   display: flex;
   flex-direction: column;
+  flex-wrap: wrap;
   position: relative;
   z-index: 100;
 
@@ -53,6 +67,7 @@ form{
   border-radius: 10px;
   color: #3A506B;
   flex-grow: 4;
+  flex-wrap: wrap;
   height: 30px;
   padding: 10px;
   font-size: 1rem;
@@ -71,9 +86,18 @@ button{
   width: 55%;
   margin-left: auto;
   margin-right: auto;
-  color: #DFE5F7;
-  font-size: 1.2rem;
+  color: #CED8F2;
 }
+
+#results a{
+  color: #5BC0BE;
+
+}
+
+#results p{
+  font-size: 1rem;
+}
+
 
 body .bg {
   width: 100vw;

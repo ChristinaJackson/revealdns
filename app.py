@@ -9,14 +9,16 @@ def home():
 
 @app.route('/info', methods=['GET'])
 def info():
-    # Get the domain from the query parameter
     domain = request.args.get('domain')
+    data = None
+    error_message = None
 
-    # Call your get_info function to fetch data
-    data = get_info(domain)
+    if domain:
+        data = get_info(domain)  # Get results only if domain is not empty
+    else:
+        error_message = "Please enter a valid domain."
 
-    # Render the result page with the data
-    return render_template('index.html', data=data)
+    return render_template('index.html', data=data, error_message=error_message)
 
 # if __name__ == '__main__':
 #     app.run(debug=True)
