@@ -88,12 +88,13 @@ def get_info(domain_name):
     domain_input = domain_name
     # validate domain input
     validation_result = validate_domain(domain_name)
+
+    # if validation fails,  still try to get the Whois data
     if not validation_result["is_valid"]:
-        # if its invalid, return error
         return {
             "results for": domain_name,
             "error": validation_result["error"],
-            "domain_registrar": None,
+            "domain_registrar": get_domain_registrar_info(domain_name),
             "hosting_provider": None
         }
 
@@ -139,7 +140,7 @@ def get_info(domain_name):
 # print(get_ipinfo("invalid-domain"))  # Invalid domain
 # print(get_ipinfo(""))  # Empty input
 
-print(get_info('sanitär.jetzt'))
+# print(get_info('sanitär.jetzt'))
 
 # print(whois.whois(''))
 
