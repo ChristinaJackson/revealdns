@@ -33,7 +33,7 @@
             <button type="submit">Search</button>
     </form>
 </section>
-<section id="results">
+<section id="results" {% if not data and not error_message %}style="display: none;"{% endif %}>
     <!-- Show the result for domain or error message -->
     <h3>Results for: {{ data['results for'] if data else 'No results due to error' }}</h3>
 
@@ -78,6 +78,7 @@
         <a href="{{ data['hosting_provider']['lookup_url'] if data else '#' }}" target="_blank">View hosting abuse details on IPinfo</a>
     {% endif %}
 </section>
+
 
 
 </body>
