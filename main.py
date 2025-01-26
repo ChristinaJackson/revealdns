@@ -1,12 +1,11 @@
 import whois
 import socket
 
-
+#### TODOS
+#want to include dns records in initial results
 #using whois for now, will want to move to using rdap in the future,
 #with a whois fallback when tld does not support rdap
 #might be good to cache results
-
-###TBD - Get DNS Records
 
 def validate_domain(domain_name):
     #check for blank input
