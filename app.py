@@ -3,25 +3,27 @@ from main import get_info
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route("/", methods=["GET"])
 def home():
-    return render_template('index.html')
+    # Initial load without any data or error
+    return render_template("index.html", data={}, error_message=None)
 
-@app.route('/info', methods=['GET'])
+@app.route("/info", methods=["GET"])
 def info():
-    domain = request.args.get('domain')
-    data = None
+    data = {}
     error_message = None
 
-    if domain:
-        data = get_info(domain)  # Get results only if domain is not empty
+    # Get the domain from the query parameter
+    domain_name = request.args.get("domain")
+    if domain_name:
+        try:
+            data = get_info(domain_name) or {}
+        except Exception as e:
+            error_message = str(e)
     else:
-        error_message = "Please enter a valid domain."
+        error_message = "Please provide a valid domain."
 
-    return render_template('index.html', data=data, error_message=error_message)
+    return render_template("index.html", data=data, error_message=error_message)
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True, port=5050)

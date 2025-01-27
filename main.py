@@ -25,24 +25,23 @@ def validate_domain(domain_name):
         # catch any unexpected errors
         return {"is_valid": False, "error": f"Unexpected error: {str(e)}"}
 
-def get_ipinfo(ip_address):
+def get_ipinfo(domain_name):
     try:
-        hosting_provider_ip = socket.gethostbyname(ip_address)
-        return hosting_provider_ip
-    #addressing common errors
+        # Attempt to resolve the domain
+        hosting_provider_ip = socket.gethostbyname(domain_name)
+        # print(hosting_provider_ip)
+        return {"ip": hosting_provider_ip, "error": None}
     except socket.gaierror as e:
-        # handle invalid domain or IP address
-        # -2 is eai_noname - host name cannot resolve because does not exist or is invalid
-        if e.errno == -2:
-            return {"error": "Hostname not found"}
-        #-3 is eai_again, temp dns resolution failure
-        elif e.errno == -3:
-            return {"error": "Temporary DNS issue, try again"}
+        if e.errno == -2:  # Hostname not found
+            return {"ip": None, "error": "Hostname not found"}
+        elif e.errno == -3:  # Temporary DNS failure
+            return {"ip": None, "error": "Temporary DNS issue, try again"}
         else:
-            return {"error": f"DNS resolution failed: {e.strerror}"}
+            return {"ip": None, "error": f"DNS resolution failed: {e.strerror}"}
     except Exception as e:
         # Catch any other unexpected errors
-        return {"error": str(e), "message": "An unexpected error occurred"}
+        return {"ip": None, "error": f"An unexpected error occurred: {str(e)}"}
+
 
 def generate_ipinfo_link(ip_address):
     # Generate IPinfo link
@@ -89,7 +88,7 @@ def get_info(domain_name):
     # validate domain input
     validation_result = validate_domain(domain_name)
 
-    # if validation fails,  still try to get the Whois data
+    # if validation fails, still try to get the Whois data
     if not validation_result["is_valid"]:
         return {
             "results for": domain_name,
@@ -102,20 +101,22 @@ def get_info(domain_name):
     hosting_provider_ip = get_ipinfo(domain_name)
     hosting_provider = {}
 
-    if isinstance(hosting_provider_ip, dict) and "error" in hosting_provider_ip:
-        # If there's an error, add the error to the results
+    # handle errors in the IP lookup
+    if hosting_provider_ip.get("error"):
         hosting_provider = {
             "ip": None,
             "lookup_url": None,
             "error": hosting_provider_ip["error"]
         }
     else:
-        # If no error, create the lookup URL
-        ipinfo_url = generate_ipinfo_link(hosting_provider_ip)
+        # if successful, generate the IPinfo lookup URL
+        ipinfo_url = generate_ipinfo_link(hosting_provider_ip["ip"])
         hosting_provider = {
-            "ip": hosting_provider_ip,
-            "lookup_url": ipinfo_url
+            "ip": hosting_provider_ip["ip"],
+            "lookup_url": ipinfo_url,
+            "error": None
         }
+
     results = {
         "results for": domain_input,
         "domain_registrar": domain_registrar,
@@ -141,7 +142,7 @@ def get_info(domain_name):
 # print(get_ipinfo("invalid-domain"))  # Invalid domain
 # print(get_ipinfo(""))  # Empty input
 
-# print(get_info('sanitär.jetzt'))
+# print(get_info('www.joesloandesign.com'))
 
 # print(whois.whois(''))
 

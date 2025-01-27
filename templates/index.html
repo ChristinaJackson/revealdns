@@ -5,84 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" type="text/css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap" rel="stylesheet">
     <title>Bears and Bees</title>
 </head>
 <body>
-
-<body>
-  <div class="bg">
-  <div class="aur_cont">
-    <span class="aur aur_1"></span>
-    <span class="aur aur_2"></span>
-    <span class="aur aur_3"></span>
-    <span class="aur aur_4"></span>
-    <span class="aur aur_5"></span>
-    <span class="aur aur_6"></span>
-    <span class="aur aur_7"></span>
-    <span class="aur aur_8"></span>
-    <span class="aur aur_9"></span>
-    <span class="aur aur_10"></span>
-  </div>
-</div>
-  <section id='form-section'>
+    <div class="bg">
+        <div class="aur_cont">
+            <span class="aur aur_1"></span>
+            <span class="aur aur_2"></span>
+            <span class="aur aur_3"></span>
+            <span class="aur aur_4"></span>
+            <span class="aur aur_5"></span>
+            <span class="aur aur_6"></span>
+            <span class="aur aur_7"></span>
+            <span class="aur aur_8"></span>
+            <span class="aur aur_9"></span>
+            <span class="aur aur_10"></span>
+        </div>
+    </div>
+    <section id='form-section'>
         <h1>Locate Domain Abuse Contacts</h1>
-    <form id='form' action="/info" method="get">
+        <form id='form' action="/info" method="get">
             <input id="form-input" type="text" name="domain" placeholder="Enter a domain">
             <button type="submit">Search</button>
-    </form>
-</section>
-<section id="results" {% if not data and not error_message %}style="display: none;"{% endif %}>
-    <!-- Show the result for domain or error message -->
-    <h3>Results for: {{ data['results for'] if data else 'No results due to error' }}</h3>
+        </form>
+    </section>
+    <section id="results" {% if not data and not error_message %}style="display: none;"{% endif %}>
+        <h3>Results for: {{ data['results for'] if data else 'No results due to error' }}</h3>
 
-    {% if error_message %}
-        <!-- If there's an error, show the error message -->
-        <div style="color: red; font-weight: bold;">
-            <p>{{ error_message }}</p>
-        </div>
-    {% else %}
-        <!-- Domain Registrar Section -->
-        <h2>Domain Registrar</h2>
-        <p>Name: {{ data['domain_registrar']['registrar_info']['name'] if data else 'Not Available' }}</p>
-        <p>URL: <a href="{{ data['domain_registrar']['registrar_info']['url'] if data else '#' }}">{{ data['domain_registrar']['registrar_info']['url'] if data else 'Not Available' }}</a></p>
-
-        <!-- Abuse Emails Section -->
-        <h3>Abuse Emails</h3>
-        <ul>
-            {% if data and data['domain_registrar']['abuse_emails'] %}
-                {% for email in data['domain_registrar']['abuse_emails'] %}
-                    <li><a href="mailto:{{ email }}">{{ email }}</a></li>
-                {% endfor %}
+        {% if error_message %}
+            <div style="color: red; font-weight: bold;">
+                <p>{{ error_message }}</p>
+            </div>
+        {% else %}
+            <h2>Domain Registrar</h2>
+            <p>Name: {{ data.get('domain_registrar', {}).get('registrar_info', {}).get('name', 'Not Available') }}</p>
+            {% set registrar_urls = data.get('domain_registrar', {}).get('registrar_info', {}).get('url', []) %}
+            {% if registrar_urls %}
+                <h3 id="url-section">URLs:</h3>
+                <ul>
+                    {% if registrar_urls is iterable and not registrar_urls is string %}
+                        {% for url in registrar_urls if url.startswith('https://') %}
+                            <li><a href="{{ url }}">{{ url }}</a></li>
+                        {% endfor %}
+                    {% elif registrar_urls.startswith('https://') %}
+                        <li><a href="{{ registrar_urls }}">{{ registrar_urls }}</a></li>
+                    {% else %}
+                        <p>URL: Not Available</p>
+                    {% endif %}
+                </ul>
             {% else %}
-                <li>No abuse emails available</li>
+                <p>URL: Not Available</p>
             {% endif %}
-        </ul>
 
-        <!-- Other Emails Section -->
-        <h3>Other Emails</h3>
-        <ul>
-            {% if data and data['domain_registrar']['other_emails'] %}
-                {% for email in data['domain_registrar']['other_emails'] %}
+            <h3>Abuse Emails</h3>
+            <ul>
+                {% for email in data.get('domain_registrar', {}).get('abuse_emails', []) %}
                     <li><a href="mailto:{{ email }}">{{ email }}</a></li>
+                {% else %}
+                    <li>No abuse emails available</li>
                 {% endfor %}
+            </ul>
+
+            <h3>Other Emails</h3>
+            <ul>
+                {% for email in data.get('domain_registrar', {}).get('other_emails', []) %}
+                    <li><a href="mailto:{{ email }}">{{ email }}</a></li>
+                {% else %}
+                    <li>No other emails available</li>
+                {% endfor %}
+            </ul>
+
+            <h2>Hosting Provider</h2>
+            {% if data.get('hosting_provider', {}) %}
+                {% if data['hosting_provider'].get('error') %}
+                    <p>Error: {{ data['hosting_provider']['error'] }}</p>
+                {% elif data['hosting_provider'].get('ip') %}
+                    <p>IP: {{ data['hosting_provider']['ip'] }}</p>
+                    {% if data['hosting_provider'].get('lookup_url') %}
+                        <a href="{{ data['hosting_provider']['lookup_url'] }}" target="_blank">View hosting abuse details on IPinfo</a>
+                    {% else %}
+                        <p>IPinfo lookup URL not available.</p>
+                    {% endif %}
+                {% else %}
+                    <p>No hosting provider information available.</p>
+                {% endif %}
             {% else %}
-                <li>No other emails available</li>
+                <p>Hosting provider data not available.</p>
             {% endif %}
-        </ul>
-
-        <!-- Hosting Provider Section -->
-        <h2>Hosting Provider</h2>
-        <p>IP: {{ data['hosting_provider']['ip'] if data else 'Not Available' }}</p>
-        <a href="{{ data['hosting_provider']['lookup_url'] if data else '#' }}" target="_blank">View hosting abuse details on IPinfo</a>
-    {% endif %}
-</section>
-
-
-
-</body>
-
-
+        {% endif %}
+    </section>
 </body>
 </html>
