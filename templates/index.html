@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap" rel="stylesheet">
-    <title>Bears and Bees</title>
+    <title>Domain Abuse Check</title>
 </head>
 <body>
     <div class="bg">
@@ -32,11 +32,12 @@
         </form>
     </section>
     <section id="results" {% if not data and not error_message %}style="display: none;"{% endif %}>
-        <h3>Results for: {{ data['results for'] if data else 'No results due to error' }}</h3>
-
+        {% if data %}
+    <h3>Results for: {{ data['results for'] }}</h3>
+        {% endif %}
         {% if error_message %}
-            <div style="color: red; font-weight: bold;">
-                <p>{{ error_message }}</p>
+            <div>
+                <h2>{{ error_message }}</h2>
             </div>
         {% else %}
             <h2>Domain Registrar</h2>
